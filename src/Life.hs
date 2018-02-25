@@ -23,7 +23,7 @@ module Life (
         -- * Playing game of life
         generation, generationWithRule,
         -- ** Rules
-        Rule,
+        Rule, mkRule,
         -- *** Common rules
         defaultRule, conwayRule,
         rule3G3, rule1357,
@@ -110,25 +110,24 @@ type Rule = (Life -> Int -> Life)
 -- | Default rule used by 'generation'. Same as 'conwayRule'.
 defaultRule = conwayRule
 
--- | Conway's rule (23/3): A cell is born from 3 living cells. A cell only stays alive with 2 or 3 alive neighbours.
-conwayRule :: Rule
-conwayRule Alive 2 = Alive
-conwayRule _     3 = Alive
-conwayRule _     _ = Dead
+-- | Conway's rule (23/3): A cell is born from 3 living cells. A cell only
+-- stays alive with 2 or 3 alive neighbours.
+conwayRule = mkRule [2,3] [3]
 
 -- | G3 or 3/3 world
-rule3G3 :: Rule
-rule3G3 Alive 3 = Alive
-rule3G3 Dead  3 = Alive
-rule3G3 _     _ = Dead
+rule3G3 = mkRule [3] [3]
 
 -- | Copy world (1357/1357)
-rule1357 :: Rule
-rule1357 _ 1 = Alive
-rule1357 _ 3 = Alive
-rule1357 _ 5 = Alive
-rule1357 _ 7 = Alive
-rule1357 _ _ = Dead
+rule1357 = mkRule [1,3,5,7] [1,3,5,7]
+
+-- | @mkRule survive birth@ returns a new rule, where @survive@ and @birth@
+-- specify cell counts for survival and birth of a cell:
+--
+-- > mkRule [2,3] [3] == conwayRule
+mkRule :: [Int] -> [Int] -> Rule
+mkRule survive birth = rule
+    where rule Alive n = if n `elem` survive then Alive else Dead
+          rule Dead  n = if n `elem` birth then Alive else Dead
 
 -- | String representation of cells
 data LifeSign = LifeSign {symDead :: String, symAlive :: String} deriving Show
