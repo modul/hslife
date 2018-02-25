@@ -15,7 +15,7 @@ Simulating /Conway's Game of Life/ on a bounded board.
 
 module Life (
         -- * Types
-        Life(..), Coord, World,
+        Life(..), World, Coord, Height, Width,
         -- * Neighbourhood of a cell
         neighbourhood, neighbours,
         -- * World generation
@@ -43,14 +43,14 @@ import qualified Data.Map.Strict as Map
 data Life = Dead | Alive deriving (Eq, Show)
 
 -- | Coordinates
-type Coord = (Word, Word)
+type Coord = (Height, Width)
 
 -- | World grid
 type World = Map.Map Coord Life
 
-type Radius = Word
-type Height = Word
-type Width = Word
+type Height = Int
+type Width = Int
+type Radius = Int
 
 -- | @radius p r@ returns a list of coordinates within a radius @r@ of point
 -- @p@.
@@ -79,8 +79,7 @@ neighbours c life = Map.size . Map.filter (==life) . neighbourhood c
 -- less than @w * h@.
 mkWorldFrom :: [Life] -> Height -> Width -> World
 mkWorldFrom v h w = Map.fromList $ zip coords cells
-    where cells  = take size $ cycle v
-          size   = fromInteger . toInteger $ w * h
+    where cells  = take (w * h) $ cycle v
           coords = [(y, x) | x <- [0..w-1], y <- [0..h-1]]
 
 -- | Create a blank world with dead cells. Same as @mkWorldFrom [Dead]@.
@@ -135,10 +134,10 @@ mkRule survive birth = rule
     where rule Alive n = if n `elem` survive then Alive else Dead
           rule Dead  n = if n `elem` birth then Alive else Dead
 
--- | String representation of cells
+-- | String representation of cells.
 data LifeSign = LifeSign {symDead :: String, symAlive :: String} deriving Show
 
--- | Default representation: @Dead: " ", Alive: "•"@
+-- | Default representation: @Dead: " ", Alive: "•"@.
 defaultLifeSign = LifeSign " " "•"
 
 -- | @showWorld w repr@ shows a grid of cells using a 'LifeSign' @repr@ as
