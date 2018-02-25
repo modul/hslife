@@ -1,0 +1,34 @@
+name: gameoflife
+version: 0.1.0.0
+synopsis: Simulation of Conway's Game of Life
+github: modul/hslife
+author: Remo Giermann
+maintainer: mo@liberejo.de
+license: BSD3
+category: Game
+extra-source-files: README.md
+
+dependencies: 
+    - base
+    - random
+
+library: 
+    source-dirs: src
+    dependencies: containers
+
+tests:
+    spec: 
+        main: Spec.hs
+        source-dirs: 
+            - test
+            - src
+        dependencies: 
+            - containers
+            - hspec
+            - QuickCheck
+
+executable:    
+    main: Main.hs
+    source-dirs: executables
+    dependencies: gameoflife
+
