@@ -25,7 +25,6 @@ tests:
         dependencies: 
             - containers
             - hspec
-            - QuickCheck
 
 executable:    
     main: Main.hs

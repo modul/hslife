@@ -42,12 +42,6 @@ import qualified Data.Map.Strict as Map
 -- | The state of a cell.
 data Life = Dead | Alive deriving (Eq, Show)
 
--- | String representation of cells
-data LifeSign = LifeSign {symDead :: String, symAlive :: String}
-
--- | Default representation: @Dead: "o", Alive: "x"@
-defaultLifeSign = LifeSign " " "x"
-
 -- | Coordinates
 type Coord = (Word, Word)
 
@@ -102,13 +96,6 @@ mkRandWorld g = mkWorldFrom cells
 
 -- | @generation w@ determines the next generation of a world @w@ using the 'defaultRule'.
 generation :: World -> World 
-{-generation w = Map.mapWithKey destiny w
-    where destiny k v = let n = neighbours k Alive w
-                         in case v of
-                            Alive -> if n < 2 || n > 3 then Dead else Alive
-                            Dead  -> if n == 3 then Alive else Dead
--}
-
 generation = generationWithRule defaultRule 
 
 -- | @generation rule world@ calculates the next generation of @world@, using @rule@.
@@ -116,21 +103,6 @@ generationWithRule :: Rule -> World -> World
 generationWithRule rule w = Map.mapWithKey destiny w
     where destiny coord life = let n = neighbours coord Alive w
                                 in rule life n
-
--- | @showWorld w repr@ shows a grid of cells using a 'LifeSign' @repr@ as symbols for dead/alive cells.
-showWorldUsing :: LifeSign -> World -> String
-showWorldUsing repr w = Map.foldMapWithKey (printer repr width) w
-    where ((_, width), _) = Map.findMax w
-
--- | Displays a grid of cells using 'defaultLifeSign'. 
-showWorld :: World -> String
-showWorld = showWorldUsing defaultLifeSign 
-
-printer repr width (y, x) v = showCell v ++ endl
-    where endl = if x >= width then "\n" else ""
-          showCell Alive = symAlive repr
-          showCell Dead  = symDead repr
-
 
 -- | Specifies a rule to determine the fate of a cell.
 type Rule = (Life -> Int -> Life)
@@ -157,3 +129,24 @@ rule1357 _ 3 = Alive
 rule1357 _ 5 = Alive
 rule1357 _ 7 = Alive
 rule1357 _ _ = Dead
+
+-- | String representation of cells
+data LifeSign = LifeSign {symDead :: String, symAlive :: String} deriving Show
+
+-- | Default representation: @Dead: " ", Alive: "•"@
+defaultLifeSign = LifeSign " " "•"
+
+-- | @showWorld w repr@ shows a grid of cells using a 'LifeSign' @repr@ as symbols for dead/alive cells.
+showWorldUsing :: LifeSign -> World -> String
+showWorldUsing repr w = Map.foldMapWithKey (printer repr width) w
+    where ((_, width), _) = Map.findMax w
+
+-- | Displays a grid of cells using 'defaultLifeSign'. 
+showWorld :: World -> String
+showWorld = showWorldUsing defaultLifeSign 
+
+printer repr width (y, x) v = showCell v ++ endl
+    where endl = if x >= width then "\n" else ""
+          showCell Alive = symAlive repr
+          showCell Dead  = symDead repr
+
