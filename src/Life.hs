@@ -6,7 +6,7 @@ License     : BSD3
 
 Simulating /Conway's Game of Life/ on a bounded board.
 
-> -- Get 15 generations from a 30x80 random world using @5@ as seed:
+> -- Get 15 generations from a 30x80 random world using 5 as seed:
 > gens = take 15 . iterate . generation $ mkRandWorld (mkStdGen 5) 30 80
 > -- Print each generation:
 > mapM_ putStrLn . map showWorld $ gens
@@ -52,7 +52,8 @@ type Radius = Word
 type Height = Word
 type Width = Word
 
--- | @radius p r@ returns a list of coordinates within a radius @r@ of point @p@.
+-- | @radius p r@ returns a list of coordinates within a radius @r@ of point
+-- @p@.
 radius :: (Enum a, Num a, Eq a) => (a, a) -> a -> [(a, a)]
 radius (x, y) r = [(x', y') | x' <- [x-r..x+r], y' <- [y-r..y+r]]
 
@@ -60,7 +61,8 @@ radius (x, y) r = [(x', y') | x' <- [x-r..x+r], y' <- [y-r..y+r]]
 radius' :: (Enum a, Num a, Eq a) => (a, a) -> a -> [(a, a)]
 radius' (x, y) r = [(x', y') | x' <- [x-r..x+r], y' <- [y-r..y+r], (x', y') /= (x, y)]
 
--- | @around p rad w@ gets cells from a grid @w@ that are within the radius @rad@ of a given cell @p@.
+-- | @around p rad w@ gets cells from a grid @w@ that are within the radius
+-- @rad@ of a given cell @p@.
 around :: Coord -> Radius -> World -> World
 around p rad w = Map.restrictKeys w coords
     where coords = Set.fromList (radius' p 1)
@@ -68,11 +70,13 @@ around p rad w = Map.restrictKeys w coords
 -- | Get the immediate neighbourhood of a cell (radius=1).
 neighbourhood c = around c 1
 
--- | @neighbours c life@ Count the number of cells within the neighbourhood whose state match @life@.
+-- | @neighbours c life@ Count the number of cells within the neighbourhood
+-- whose state match @life@.
 neighbours c life = Map.size . Map.filter (==life) . neighbourhood c
 
--- | @mkWorldFrom v w h@ generates a @w * h@ sized world grid with cell values from @v@.
--- The values are repeated for all cells if the length of @v@ is less than @w * h@.
+-- | @mkWorldFrom v w h@ generates a @w * h@ sized world grid with cell values
+-- from @v@.  The values are repeated for all cells if the length of @v@ is
+-- less than @w * h@.
 mkWorldFrom :: [Life] -> Height -> Width -> World
 mkWorldFrom v h w = Map.fromList $ zip coords cells
     where cells  = take size $ cycle v
@@ -94,11 +98,13 @@ mkRandWorld g = mkWorldFrom cells
           life True = Alive
           life False = Dead
 
--- | @generation w@ determines the next generation of a world @w@ using the 'defaultRule'.
+-- | @generation w@ determines the next generation of a world @w@ using the
+-- 'defaultRule'.
 generation :: World -> World 
 generation = generationWithRule defaultRule 
 
--- | @generation rule world@ calculates the next generation of @world@, using @rule@.
+-- | @generation rule world@ calculates the next generation of @world@, using
+-- @rule@.
 generationWithRule :: Rule -> World -> World
 generationWithRule rule w = Map.mapWithKey destiny w
     where destiny coord life = let n = neighbours coord Alive w
@@ -135,7 +141,8 @@ data LifeSign = LifeSign {symDead :: String, symAlive :: String} deriving Show
 -- | Default representation: @Dead: " ", Alive: "•"@
 defaultLifeSign = LifeSign " " "•"
 
--- | @showWorld w repr@ shows a grid of cells using a 'LifeSign' @repr@ as symbols for dead/alive cells.
+-- | @showWorld w repr@ shows a grid of cells using a 'LifeSign' @repr@ as
+-- symbols for dead/alive cells.
 showWorldUsing :: LifeSign -> World -> String
 showWorldUsing repr w = Map.foldMapWithKey (printer repr width) w
     where ((_, width), _) = Map.findMax w
