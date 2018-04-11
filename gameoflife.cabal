@@ -1,0 +1,66 @@
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 3ad4db034a70d792097d5b2e77914d24ab5a7e194806b50af372529b39f85e52
+
+name:           gameoflife
+version:        0.1.0.0
+synopsis:       Simulation of Conway's Game of Life
+category:       Game
+homepage:       https://github.com/modul/hslife#readme
+bug-reports:    https://github.com/modul/hslife/issues
+author:         Remo Giermann
+maintainer:     mo@liberejo.de
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    LICENSE
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/modul/hslife
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      base
+    , containers
+    , random
+  exposed-modules:
+      Life
+  other-modules:
+      Paths_gameoflife
+  default-language: Haskell2010
+
+executable gameoflife
+  main-is: Main.hs
+  hs-source-dirs:
+      executables
+  build-depends:
+      base
+    , gameoflife
+    , random
+  other-modules:
+      Paths_gameoflife
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  build-depends:
+      base
+    , containers
+    , gameoflife
+    , hspec
+    , random
+  other-modules:
+      Paths_gameoflife
+  default-language: Haskell2010
