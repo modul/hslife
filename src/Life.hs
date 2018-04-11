@@ -25,8 +25,7 @@ module Life (
         -- ** Rules
         Rule, mkRule,
         -- *** Common rules
-        defaultRule, conwayRule,
-        rule3G3, rule1357,
+        defaultRule, conwayRule, rule1357,
         -- * Display
         LifeSign(..),
         defaultLifeSign,
@@ -55,22 +54,18 @@ type Radius = Int
 -- | @radius p r@ returns a list of coordinates within a radius @r@ of point
 -- @p@.
 radius :: (Enum a, Num a, Eq a) => (a, a) -> a -> [(a, a)]
-radius (x, y) r = [(x', y') | x' <- [x-r..x+r], y' <- [y-r..y+r]]
-
--- | Same as 'radius' but it excludes the center point @p@.
-radius' :: (Enum a, Num a, Eq a) => (a, a) -> a -> [(a, a)]
-radius' (x, y) r = [(x', y') | x' <- [x-r..x+r], y' <- [y-r..y+r], (x', y') /= (x, y)]
+radius (x, y) r = [(x', y') | x' <- [x-r..x+r], y' <- [y-r..y+r], (x', y') /= (x, y)]
 
 -- | @around p rad w@ gets cells from a grid @w@ that are within the radius
 -- @rad@ of a given cell @p@.
 around :: Coord -> Radius -> World -> World
 around p rad w = Map.restrictKeys w coords
-    where coords = Set.fromList (radius' p 1)
+    where coords = Set.fromList (radius p 1)
 
 -- | Get the immediate neighbourhood of a cell (radius=1).
 neighbourhood c = around c 1
 
--- | @neighbours c life@ Count the number of cells within the neighbourhood
+-- | @neighbours p life@ Count the number of cells within the neighbourhood
 -- whose state match @life@.
 neighbours c life = Map.size . Map.filter (==life) . neighbourhood c
 
@@ -118,9 +113,6 @@ defaultRule = conwayRule
 -- | Conway's rule (23/3): A cell is born from 3 living cells. A cell only
 -- stays alive with 2 or 3 alive neighbours.
 conwayRule = mkRule [2,3] [3]
-
--- | G3 or 3/3 world
-rule3G3 = mkRule [3] [3]
 
 -- | Copy world (1357/1357)
 rule1357 = mkRule [1,3,5,7] [1,3,5,7]
