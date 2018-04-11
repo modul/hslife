@@ -5,8 +5,8 @@ import System.Random
 import System.Environment
 import System.Exit
 
-width = 80
-height = 40
+width = 120
+height = 30
 showw = showWorldUsing defaultLifeSign
 
 generate = iterate generation

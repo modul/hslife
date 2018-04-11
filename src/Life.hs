@@ -7,7 +7,7 @@ License     : BSD3
 Simulating /Conway's Game of Life/ on a bounded board.
 
 > -- Get 15 generations from a 30x80 random world using 5 as seed:
-> gens = take 15 . iterate . generation $ mkRandWorld (mkStdGen 5) 30 80
+> gens = take 15 . iterate generation $ mkRandWorld (mkStdGen 5) 30 80
 > -- Print each generation:
 > mapM_ putStrLn . map showWorld $ gens
 
@@ -39,7 +39,11 @@ import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
 
 -- | The state of a cell.
-data Life = Dead | Alive deriving (Eq, Show)
+data Life = Dead -- ^ cell is (still) dead
+          | Alive -- ^ cell is (still) alive
+          | Died -- ^ cell just died, i.e. was alive last generation
+          | Born -- ^ cell was just born, i.e. was alive last generation 
+            deriving (Eq, Show)
 
 -- | Coordinates
 type Coord = (Height, Width)
@@ -101,8 +105,9 @@ generation = generationWithRule defaultRule
 -- @rule@.
 generationWithRule :: Rule -> World -> World
 generationWithRule rule w = Map.mapWithKey destiny w
-    where destiny coord life = let n = neighbours coord Alive w
-                                in rule life n
+    where destiny coord life = let n = neighbours coord Alive w 
+                                   m = neighbours coord Born w
+                                in rule life (n + m)
 
 -- | Specifies a rule to determine the fate of a cell.
 type Rule = (Life -> Int -> Life)
@@ -123,16 +128,23 @@ rule1357 = mkRule [1,3,5,7] [1,3,5,7]
 -- > mkRule [2,3] [3] == conwayRule
 mkRule :: [Int] -> [Int] -> Rule
 mkRule survive birth = rule
-    where rule Alive n = if n `elem` survive then Alive else Dead
-          rule Dead  n = if n `elem` birth then Alive else Dead
+    where rule Born  n = if n `elem` survive then Alive else Died
+          rule Alive n = if n `elem` survive then Alive else Died
+          rule Died  n = if n `elem` birth then Born else Dead
+          rule Dead  n = if n `elem` birth then Born else Dead
 
 -- | String representation of cells.
-data LifeSign = LifeSign {symDead :: String, symAlive :: String} deriving Show
+data LifeSign = LifeSign { 
+                symDead :: String, 
+                symAlive :: String,
+                symDied :: String,
+                symBorn :: String
+              } deriving Show
 
--- | Default representation: @Dead: " ", Alive: "•"@.
-defaultLifeSign = LifeSign " " "•"
+-- | Default representation: @Dead: " ", Alive: "●", Died: "◌", Born: "◍"@.
+defaultLifeSign = LifeSign " " "●" "◌" "◍"
 
--- | @showWorld w repr@ shows a grid of cells using a 'LifeSign' @repr@ as
+-- | @showWorldUsing w repr@ shows a grid of cells using a 'LifeSign' @repr@ as
 -- symbols for dead/alive cells.
 showWorldUsing :: LifeSign -> World -> String
 showWorldUsing repr w = Map.foldMapWithKey (printer repr width) w
@@ -142,8 +154,9 @@ showWorldUsing repr w = Map.foldMapWithKey (printer repr width) w
 showWorld :: World -> String
 showWorld = showWorldUsing defaultLifeSign 
 
-printer repr width (y, x) v = showCell v ++ endl
+printer repr width (_, x) v = showCell v ++ endl
     where endl = if x >= width then "\n" else ""
           showCell Alive = symAlive repr
+          showCell Born  = symBorn repr
           showCell Dead  = symDead repr
-
+          showCell Died  = symDied repr
