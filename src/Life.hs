@@ -15,7 +15,7 @@ Simulating /Conway's Game of Life/ on a bounded board.
 
 module Life (
         -- * Types
-        Life(..), World, Coord, Height, Width,
+        Cell(..), World, Coord, Height, Width,
         -- * Neighbourhood of a cell
         neighbourhood, neighbours,
         -- * World generation
@@ -39,17 +39,17 @@ import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
 
 -- | The state of a cell.
-data Life = Dead -- ^ cell is (still) dead
+data Cell = Dead -- ^ cell is (still) dead
           | Alive -- ^ cell is (still) alive
           | Died -- ^ cell just died, i.e. was alive last generation
           | Born -- ^ cell was just born, i.e. was alive last generation 
-            deriving (Eq, Show)
+            deriving (Eq, Show)            
 
 -- | Coordinates
 type Coord = (Height, Width)
 
 -- | World grid
-type World = Map.Map Coord Life
+type World = Map.Map Coord Cell
 
 type Height = Int
 type Width = Int
@@ -76,7 +76,7 @@ neighbours c life = Map.size . Map.filter (==life) . neighbourhood c
 -- | @mkWorldFrom v w h@ generates a @w * h@ sized world grid with cell values
 -- from @v@.  The values are repeated for all cells if the length of @v@ is
 -- less than @w * h@.
-mkWorldFrom :: [Life] -> Height -> Width -> World
+mkWorldFrom :: [Cell] -> Height -> Width -> World
 mkWorldFrom v h w = Map.fromList $ zip coords cells
     where cells  = take (w * h) $ cycle v
           coords = [(y, x) | x <- [0..w-1], y <- [0..h-1]]
@@ -110,7 +110,7 @@ generationWithRule rule w = Map.mapWithKey destiny w
                                 in rule life (n + m)
 
 -- | Specifies a rule to determine the fate of a cell.
-type Rule = (Life -> Int -> Life)
+type Rule = (Cell -> Int -> Cell)
 
 -- | Default rule used by 'generation'. Same as 'conwayRule'.
 defaultRule = conwayRule
