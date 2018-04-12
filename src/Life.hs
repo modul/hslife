@@ -41,11 +41,14 @@ import qualified Data.Map.Strict as Map
 -- | The state of a cell.
 data Life = Dead | Alive deriving (Eq, Show)
 
+-- | A Cell with its state and age.
+data Cell = Cell Life Int deriving Show
+
 -- | Coordinates
 type Coord = (Height, Width)
 
 -- | World grid
-type World = Map.Map Coord Life
+type World = Map.Map Coord Cell
 
 type Height = Int
 type Width = Int
@@ -67,15 +70,17 @@ neighbourhood c = around c 1
 
 -- | @neighbours p life@ Count the number of cells within the neighbourhood
 -- whose state match @life@.
-neighbours c life = Map.size . Map.filter (==life) . neighbourhood c
+neighbours c life = Map.size . Map.filter match . neighbourhood c
+    where match (Cell x _) = x == life
 
 -- | @mkWorldFrom v w h@ generates a @w * h@ sized world grid with cell values
 -- from @v@.  The values are repeated for all cells if the length of @v@ is
 -- less than @w * h@.
 mkWorldFrom :: [Life] -> Height -> Width -> World
 mkWorldFrom v h w = Map.fromList $ zip coords cells
-    where cells  = take (w * h) $ cycle v
+    where cells  = map cell . take (w * h) . cycle $ v
           coords = [(y, x) | x <- [0..w-1], y <- [0..h-1]]
+          cell v = Cell v 0
 
 -- | Create a blank world with dead cells. Same as @mkWorldFrom [Dead]@.
 mkBlankWorld :: Height -> Width -> World
@@ -105,7 +110,7 @@ generationWithRule rule w = Map.mapWithKey destiny w
                                 in rule life n
 
 -- | Specifies a rule to determine the fate of a cell.
-type Rule = (Life -> Int -> Life)
+type Rule = (Cell -> Int -> Cell)
 
 -- | Default rule used by 'generation'. Same as 'conwayRule'.
 defaultRule = conwayRule
@@ -123,14 +128,19 @@ rule1357 = mkRule [1,3,5,7] [1,3,5,7]
 -- > mkRule [2,3] [3] == conwayRule
 mkRule :: [Int] -> [Int] -> Rule
 mkRule survive birth = rule
-    where rule Alive n = if n `elem` survive then Alive else Dead
-          rule Dead  n = if n `elem` birth then Alive else Dead
+    where rule (Cell Alive age) n = if n `elem` survive then Cell Alive (age+1) else Cell Dead 0
+          rule (Cell Dead  age) n = if n `elem` birth then Cell Alive 0 else Cell Dead (age+1)
 
 -- | String representation of cells.
-data LifeSign = LifeSign {symDead :: String, symAlive :: String} deriving Show
+data LifeSign = LifeSign {
+                symDead :: String, 
+                symBorn :: String,
+                symAlive :: String,
+                symDied :: String
+                } deriving Show
 
--- | Default representation: @Dead: " ", Alive: "•"@.
-defaultLifeSign = LifeSign " " "•"
+-- | Default representation: @Dead: " ", Born: "•", Alive: "o", Died: " "@.
+defaultLifeSign = LifeSign " " "•" "o" " "
 
 -- | @showWorld w repr@ shows a grid of cells using a 'LifeSign' @repr@ as
 -- symbols for dead/alive cells.
@@ -144,6 +154,8 @@ showWorld = showWorldUsing defaultLifeSign
 
 printer repr width (y, x) v = showCell v ++ endl
     where endl = if x >= width then "\n" else ""
-          showCell Alive = symAlive repr
-          showCell Dead  = symDead repr
+          showCell (Cell Alive 0) = symBorn repr
+          showCell (Cell Alive _) = symAlive repr
+          showCell (Cell Dead  0) = symDied repr
+          showCell (Cell Dead  _) = symDead repr
 
