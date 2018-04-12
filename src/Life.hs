@@ -55,6 +55,16 @@ type Height = Int
 type Width = Int
 type Radius = Int
 
+-- | Simplified state of a cell: either Living or Passed
+data Life = Living | Passed deriving (Eq, Show)
+
+-- | Get the simplified cell state.
+getLife :: Cell -> Life
+getLife Dead = Passed
+getLife Died = Passed
+getLife Alive = Living
+getLife Born = Living
+
 -- | @radius p r@ returns a list of coordinates within a radius @r@ of point
 -- @p@.
 radius :: (Enum a, Num a, Eq a) => (a, a) -> a -> [(a, a)]
