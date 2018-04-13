@@ -13,26 +13,16 @@
 --   
 --   <pre>
 --   -- Get 15 generations from a 30x80 random world using 5 as seed:
---   gens = take 15 . iterate generation $ mkRandWorld (mkStdGen 5) 30 80
+--   gens = take 15 . iterate . generation $ mkRandWorld (mkStdGen 5) 30 80
 --   -- Print each generation:
 --   mapM_ putStrLn . map showWorld $ gens
 --   </pre>
 module Life
 
 -- | The state of a cell.
-data Cell
-
--- | cell is (still) dead
-Dead :: Cell
-
--- | cell is (still) alive
-Alive :: Cell
-
--- | cell just died, i.e. was alive last generation
-Died :: Cell
-
--- | cell was just born, i.e. was alive last generation
-Born :: Cell
+data Life
+Dead :: Life
+Alive :: Life
 
 -- | World grid
 type World = Map Coord Cell
@@ -47,12 +37,12 @@ neighbourhood :: Coord -> World -> World
 
 -- | <tt>neighbours p life</tt> Count the number of cells within the
 --   neighbourhood whose state match <tt>life</tt>.
-neighbours :: Coord -> Cell -> World -> Int
+neighbours :: Coord -> Life -> World -> Int
 
 -- | <tt>mkWorldFrom v w h</tt> generates a <tt>w * h</tt> sized world grid
 --   with cell values from <tt>v</tt>. The values are repeated for all
 --   cells if the length of <tt>v</tt> is less than <tt>w * h</tt>.
-mkWorldFrom :: [Cell] -> Height -> Width -> World
+mkWorldFrom :: [Life] -> Height -> Width -> World
 
 -- | Create a blank world with dead cells. Same as <tt>mkWorldFrom
 --   [Dead]</tt>.
@@ -98,22 +88,21 @@ rule1357 :: Rule
 data LifeSign
 LifeSign :: String -> String -> String -> String -> LifeSign
 [symDead] :: LifeSign -> String
+[symBorn] :: LifeSign -> String
 [symAlive] :: LifeSign -> String
 [symDied] :: LifeSign -> String
-[symBorn] :: LifeSign -> String
 
--- | Default representation: <tt>Dead: " ", Alive: "●", Died: "◌", Born:
---   "◍"</tt>.
+-- | Default representation: <tt>Dead: " ", Born: "•", Alive: "o", Died: "
+--   "</tt>.
 defaultLifeSign :: LifeSign
 
 -- | Displays a grid of cells using <a>defaultLifeSign</a>.
 showWorld :: World -> String
 
--- | <tt>showWorldUsing w repr</tt> shows a grid of cells using a
+-- | <tt>showWorld w repr</tt> shows a grid of cells using a
 --   <a>LifeSign</a> <tt>repr</tt> as symbols for dead/alive cells.
 showWorldUsing :: LifeSign -> World -> String
 instance GHC.Show.Show Life.LifeSign
+instance GHC.Show.Show Life.Cell
 instance GHC.Show.Show Life.Life
 instance GHC.Classes.Eq Life.Life
-instance GHC.Show.Show Life.Cell
-instance GHC.Classes.Eq Life.Cell
