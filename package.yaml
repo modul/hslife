@@ -30,5 +30,6 @@ tests:
 executable:    
     main: Main.hs
     source-dirs: executables
-    dependencies: gameoflife
-
+    dependencies: 
+        - gameoflife
+        - ansi-terminal
