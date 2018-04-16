@@ -33,3 +33,4 @@ executable:
     dependencies: 
         - gameoflife
         - ansi-terminal
+        - cmdargs

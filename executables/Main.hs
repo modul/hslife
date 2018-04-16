@@ -9,13 +9,11 @@ import Control.Concurrent (threadDelay)
 import Control.Exception
 
 import System.Console.ANSI
-
-fps = 30
-width = 80
-height = 40
+import Options
 
 main :: IO ()
 main = do
+    (Options width height fps)  <- getOpts
     setTitle "Game of Life"
     clearScreen
     game fps height width showWorld `catch` \UserInterrupt -> exitGame
