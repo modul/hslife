@@ -2,11 +2,8 @@ module Main where
 
 import Life
 import System.Random
-import System.Environment
-import System.Exit
-import System.Info (os)
-import Control.Concurrent (threadDelay)
 import Control.Exception
+import Control.Concurrent (threadDelay)
 
 import System.Console.ANSI
 import Options
@@ -16,6 +13,7 @@ main = do
     (Options width height fps)  <- getOpts
     setTitle "Game of Life"
     clearScreen
+    hideCursor
     game fps height width showWorld `catch` \UserInterrupt -> exitGame
 
 game fps h w display = do
@@ -25,13 +23,10 @@ game fps h w display = do
     where generate = iterate generation
 
 exitGame = do
-    clearScreen
-    setCursorPosition 0 0
+    showCursor
 
-draw str = do
-    hideCursor
-    setCursorPosition 0 0
-    putStrLn str
-
-frame speed content = let delay = round (1e6 / speed)
-                       in draw content >> threadDelay delay
+frame speed content = do
+    draw content
+    threadDelay delay
+    where draw str = setCursorPosition 0 0 >> putStrLn str
+          delay    = 1000000 `div` speed
