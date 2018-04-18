@@ -62,6 +62,19 @@ generation :: World -> World
 --   <tt>world</tt>, using <tt>rule</tt>.
 generationWithRule :: Rule -> World -> World
 
+-- | A Cell with its state and age.
+data Cell
+Cell :: Life -> Int -> Cell
+data WorldStats
+WorldStats :: World -> Int -> Int -> Int -> Int -> WorldStats
+[currentBoard] :: WorldStats -> World
+[currentGeneration] :: WorldStats -> Int
+[cellsAlive] :: WorldStats -> Int
+[avgAlive] :: WorldStats -> Int
+[avgAge] :: WorldStats -> Int
+newStatistics :: WorldStats
+statistics :: WorldStats -> World -> WorldStats
+
 -- | Specifies a rule to determine the fate of a cell.
 type Rule = (Cell -> Int -> Cell)
 
@@ -103,6 +116,7 @@ showWorld :: World -> String
 --   <a>LifeSign</a> <tt>repr</tt> as symbols for dead/alive cells.
 showWorldUsing :: LifeSign -> World -> String
 instance GHC.Show.Show Life.LifeSign
+instance GHC.Show.Show Life.WorldStats
 instance GHC.Show.Show Life.Cell
 instance GHC.Show.Show Life.Life
 instance GHC.Classes.Eq Life.Life

@@ -22,6 +22,7 @@ module Life (
         mkWorldFrom, mkBlankWorld, mkOverWorld, mkRandWorld,
         -- * Playing game of life
         generation, generationWithRule,
+        Cell(..), WorldStats(..), newStatistics, statistics,
         -- ** Rules
         Rule, mkRule,
         -- *** Common rules
@@ -108,6 +109,24 @@ generationWithRule :: Rule -> World -> World
 generationWithRule rule w = Map.mapWithKey destiny w
     where destiny coord life = let n = neighbours coord Alive w
                                 in rule life n
+
+data WorldStats = WorldStats {
+                    currentBoard :: World,
+                    currentGeneration :: Int,
+                    cellsAlive :: Int,
+                    avgAlive :: Int,
+                    avgAge :: Int
+                } deriving Show
+
+newStatistics = WorldStats (mkBlankWorld 1 1) 0 0 0 0
+
+statistics s w = WorldStats w gen numAlive aliveAvg ageAlive
+    where gen = succ $ currentGeneration s 
+          alive = Map.filter (\(Cell x _) -> x == Alive) w
+          numAlive = Map.size alive
+          ageAlive = Map.foldr (\(Cell _ x) a -> x + a) 0 w
+          ageAvg   = ageAlive `div` numAlive
+          aliveAvg = (cellsAlive s + numAlive) `div` 2 -- average (avgAlive s) (currentGeneration s) numAlive
 
 -- | Specifies a rule to determine the fate of a cell.
 type Rule = (Cell -> Int -> Cell)
